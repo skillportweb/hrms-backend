@@ -1,0 +1,1 @@
+DROP TABLE "leaveapplications" CASCADE;

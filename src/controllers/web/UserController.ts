@@ -1,0 +1,274 @@
+import { Request, Response } from 'express';
+import { db } from '../../db_connect/db';
+import { eq } from 'drizzle-orm';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer'
+import { getRegistrationEmailTemplate } from '../../emails/registrationEmailTemplate';
+import { getAccountApprovedEmailTemplate } from '../../emails/accountApprovedEmailTemplate';  
+import { AuthRequest } from '../../middleware/authMiddleware';
+import { users } from './../../db_connect/Schema/UserSchema';
+
+const blacklistedTokens = new Set<string>();
+export { blacklistedTokens };
+
+
+
+const JWT_SECRET = 'your_jwt_secret_key';
+
+
+export const usersRegistration = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { firstname, lastname, email, phone, password, dob, role, designation } = req.body;
+
+    if (!firstname || !lastname || !email || !phone || !password || !dob || !designation) {
+      res.status(400).json({ message: 'All fields are required' });
+      return;
+    }
+
+    const existingUser = await db.select().from(users).where(eq(users.email, email));
+    if (existingUser.length > 0) {
+      res.status(400).json({ message: 'Email already registered' });
+      return;
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await db.insert(users).values({
+      firstname,
+      lastname,
+      email,
+      phone,
+      password: hashedPassword,
+      dob,
+      designation,
+      role: typeof role === 'number' ? role : 0
+    });
+
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'dinesh1804200182@gmail.com',
+        pass: 'alrxrwgdsrixbuen'
+      }
+    });
+
+    const mailOptions = {
+      from: '"HRMS System" <admin@example.com>',
+      to: 'dinesh1804200182@gmail.com',
+      subject: 'New Employee Registration - Approval Required',
+      html: getRegistrationEmailTemplate(firstname, lastname, email, designation)
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(201).json({ message: 'User registered and email sent successfully' });
+
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const loginUser = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      res.status(400).json({ message: "Email and password are required." });
+      return;
+    }
+
+    const userResult = await db.select().from(users).where(eq(users.email, email));
+    if (userResult.length === 0) {
+      res.status(401).json({ message: "Invalid email or password." });
+      return;
+    }
+
+    const storedUser = userResult[0];
+
+    if (!storedUser.password) {
+      res.status(500).json({ message: "Password not found for this user." });
+      return;
+    }
+
+    if (storedUser.isBlocked) {
+      res.status(403).json({ message: "Access denied. Please contact the administrator." });
+      return;
+    }
+
+    if (storedUser.role !== 1 && !storedUser.approved) {
+      res.status(403).json({ message: "Your account is not approved yet." });
+      return;
+    }
+
+    const isMatch = await bcrypt.compare(password, storedUser.password);
+    if (!isMatch) {
+      res.status(401).json({ message: "Invalid email or password." });
+      return;
+    }
+
+    const roleMessage = storedUser.role === 1 ? "Admin login successful" : "User login successful";
+
+    const token = jwt.sign(
+      { id: storedUser.id, email: storedUser.email, role: storedUser.role },
+      JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    const { password: _, ...userWithoutPassword } = storedUser;
+
+    res.status(200).json({
+      message: roleMessage,
+      token,
+      user: userWithoutPassword,
+    });
+
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+export const approveUser = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = Number(req.params.userId);
+    const { status } = req.body;
+
+    const allowedStatuses = ["approved", "blocked", "unblocked"] as const;
+    type StatusType = (typeof allowedStatuses)[number];
+
+    if (isNaN(userId) || !allowedStatuses.includes(status as StatusType)) {
+      res.status(400).json({ message: "Invalid user ID or status." });
+      return;
+    }
+
+    const result = await db.select().from(users).where(eq(users.id, userId));
+    const user = result[0];
+
+    if (!user) {
+      res.status(404).json({ message: "User not found." });
+      return;
+    }
+
+    // Already in desired state
+    if (
+      (status === "approved" && user.approved) ||
+      (status === "blocked" && user.isBlocked) ||
+      (status === "unblocked" && !user.isBlocked)
+    ) {
+      res.status(400).json({ message: `User is already ${status}.` });
+      return;
+    }
+
+    // Prepare update payload
+    const updateData: any = {};
+    if (status === "approved") {
+      updateData.approved = true;
+    } else {
+      updateData.isBlocked = status === "blocked";
+    }
+
+    // Update user record
+    await db.update(users).set(updateData).where(eq(users.id, userId));
+
+    // Only send email when approved
+    if (status === "approved") {
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.GMAIL_USER || "dinesh1804200182@gmail.com",
+          pass: process.env.GMAIL_PASS || "alrxrwgdsrixbuen",
+        },
+      });
+
+      await transporter.sendMail({
+        from: `"HRMS Admin" <admin@example.com>`,
+        to: user.email,
+        subject: "Your Account Has Been Approved",
+        html: getAccountApprovedEmailTemplate(user.firstname),
+      });
+    }
+
+    res.status(200).json({ message: `User ${status} successfully.` });
+
+  } catch (error) {
+    console.error("Update user status error:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+export const getAllUsers = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user?.id;
+    const userRole = (req as any).user?.role;
+
+  
+    if (userRole !== 1) {
+      res.status(403).json({ message: 'Access denied. Admins only.' });
+      return;
+    }
+
+    const allUsers = await db.select().from(users);
+
+    
+    const filteredUsers = allUsers
+      .filter(user => user.id !== userId)
+      .map(({ password, ...rest }) => rest);
+
+    res.status(200).json({
+      message: 'Admin fetched data successfully',
+      users: filteredUsers,
+    });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const getUserProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
+    const result = await db.select().from(users).where(eq(users.id, userId));
+    const user = result[0];
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const { password, ...userWithoutPassword } = user;
+
+    res.status(200).json({
+      message: 'User profile fetched successfully',
+      user: userWithoutPassword,
+    });
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const logoutUser = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+
+    if (!token) {
+      res.status(400).json({ message: 'Unauthorized' });
+      return;
+    }
+
+    blacklistedTokens.add(token);
+    res.status(200).json({ message: 'User logged out successfully' });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
