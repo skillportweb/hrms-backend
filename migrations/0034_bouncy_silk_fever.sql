@@ -1,0 +1,1 @@
+ALTER TABLE "user_attendance" ADD COLUMN "reason" text;

@@ -1,1 +1,0 @@
-ALTER TABLE "user_attendance" ALTER COLUMN "id" SET DATA TYPE integer;

@@ -239,6 +239,27 @@
       "when": 1753521091744,
       "tag": "0033_colorful_black_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1753784342478,
+      "tag": "0034_bouncy_silk_fever",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1753785644798,
+      "tag": "0035_concerned_vulture",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1753787287863,
+      "tag": "0036_flimsy_paibok",
+      "breakpoints": true
     }
   ]
 }

@@ -20,7 +20,7 @@ import {
   updateLeaveStatus,
   yearlyLeaving
 } from './../../controllers/web/UserLeaveController';
-import { addUserAttendance, getUserAttendanceById, punchOutAttendance } from '../../controllers/web/AttendanceController';
+import { addUserAttendance, ApproveMissPunchOut, getUserAttendanceById, punchOutAttendance, RequestMissPunchOut, } from '../../controllers/web/AttendanceController';
 
 const usersRoute: Router = express.Router();
 
@@ -47,6 +47,9 @@ usersRoute.get("/get-apply-leaves/:userId", verifyToken, getUserapplyLeaves);
 usersRoute.post("/add-user-attendance", verifyToken, addUserAttendance); 
 usersRoute.post("/attendance-punchout", verifyToken, punchOutAttendance);
 usersRoute.get("/get-attendance/:userId", verifyToken, getUserAttendanceById);
+usersRoute.post("/request-miss-punchout/:userId", verifyToken, RequestMissPunchOut);
+usersRoute.put("/approve-miss-punchout/:requestId", verifyToken, ApproveMissPunchOut);
+
  
 
 

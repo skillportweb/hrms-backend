@@ -1,1 +1,0 @@
-ALTER TABLE "leaveapplications" ADD COLUMN "updated_at" timestamp DEFAULT now();

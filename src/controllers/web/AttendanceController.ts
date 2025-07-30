@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { db } from "../../db_connect/db";
 import { userAttendance } from "../../db_connect/Schema/AttendanceSchema";
 import { and, eq } from "drizzle-orm";
+import { missPunchRequests } from "../../db_connect/Schema/MissPunchRequests";
 
 // Haversine formula to check allowed location
 function getDistanceFromLatLonInMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -17,9 +18,10 @@ function getDistanceFromLatLonInMeters(lat1: number, lon1: number, lat2: number,
   return R * c;
 }
 
-const allowedLat = 28.577;
-const allowedLon = 77.2506;
+const allowedLat = 28.6018;
+const allowedLon = 77.3895;
 const allowedRadius = 100; 
+
 
 export const addUserAttendance = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -157,6 +159,76 @@ export const getUserAttendanceById = async (req: Request, res: Response): Promis
 
   } catch (error) {
     console.error("Error fetching attendance by user ID:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+export const RequestMissPunchOut = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = Number(req.params.userId);
+    const { date, punchOut, reason } = req.body;
+
+    if (!userId || !date || !punchOut || !reason) {
+      res.status(400).json({ error: "Missing required fields." });
+      return;
+    }
+
+    await db.insert(missPunchRequests).values({
+      userId,
+      date,
+      punchOut,
+      reason,
+    });
+
+    res.status(201).json({ message: "Miss punch-out request submitted successfully." });
+  } catch (error) {
+    console.error("Miss Punch-Out Error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const ApproveMissPunchOut = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const requestId = Number(req.params.requestId);
+
+    if (!requestId) {
+      res.status(400).json({ error: "Missing request ID." });
+      return;
+    }
+
+    const [request] = await db
+      .select()
+      .from(missPunchRequests)
+      .where(eq(missPunchRequests.id, requestId));
+
+    if (!request) {
+      res.status(404).json({ error: "Request not found." });
+      return;
+    }
+
+    await db
+      .update(userAttendance)
+      .set({
+        punchOut: request.punchOut,
+        punchOutLocation: request.reason,
+        status: "Present", 
+      })
+      .where(
+        and(
+          eq(userAttendance.userId, request.userId),
+          eq(userAttendance.date, request.date)
+        )
+      );
+
+    await db
+      .update(missPunchRequests)
+      .set({ status: "Approved" })
+      .where(eq(missPunchRequests.id, requestId));
+
+    res.status(200).json({ message: "Miss punch-out request approved." });
+  } catch (error) {
+    console.error("Approve Miss Punch-Out Error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

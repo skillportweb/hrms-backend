@@ -1,1 +1,0 @@
-ALTER TABLE "user_leave_requests" ALTER COLUMN "message" SET DATA TYPE varchar;

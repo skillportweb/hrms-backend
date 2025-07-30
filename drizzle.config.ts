@@ -7,10 +7,10 @@ export default defineConfig({
   dialect: "postgresql",
   dbCredentials: {
     host: "localhost",
-    port: 5432, 
+    port: 3307,
     user: "postgres",
-    password: "Dinesh@23",
+    password: "root",
     database: "hrms",
-    ssl: false
+    ssl: false                          
   }
 });
