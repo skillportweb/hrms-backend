@@ -260,6 +260,34 @@
       "when": 1753787287863,
       "tag": "0036_flimsy_paibok",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1753961400237,
+      "tag": "0037_bizarre_nightshade",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1753962357418,
+      "tag": "0038_nosy_sabretooth",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1753962423429,
+      "tag": "0039_hesitant_paladin",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1753962547602,
+      "tag": "0040_daily_ghost_rider",
+      "breakpoints": true
     }
   ]
 }
