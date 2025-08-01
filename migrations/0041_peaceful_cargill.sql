@@ -1,0 +1,1 @@
+ALTER TABLE "user_attendance" ADD COLUMN "miss_punch_status" smallint DEFAULT 0;

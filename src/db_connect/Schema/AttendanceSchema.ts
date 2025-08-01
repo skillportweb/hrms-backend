@@ -6,7 +6,8 @@ import {
   date,
   text,
   time,
-  timestamp
+  timestamp,
+  smallint
 } from "drizzle-orm/pg-core";
 import { users } from "./UserSchema";
 
@@ -30,7 +31,8 @@ export const userAttendance = pgTable("user_attendance", {
   punchOutDate: timestamp("punch_out_date"),
   punchOutLocation: text("punch_out_location"),
 
-  status: text("status").notNull().default("Absent")
+  status: text("status").notNull().default("Absent"),
+   missPunchStatus: smallint("miss_punch_status").default(0)
 });
 
 

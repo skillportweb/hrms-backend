@@ -20,7 +20,7 @@ import {
   updateLeaveStatus,
   yearlyLeaving
 } from './../../controllers/web/UserLeaveController';
-import { addUserAttendance, ApproveMissPunchOut, getUserAttendanceById, punchOutAttendance, RequestMissPunchOut, } from '../../controllers/web/AttendanceController';
+import { addUserAttendance, ApproveMissPunchOut, getUserAttendanceById, punchOutAttendance, RequestMissPunchOut,  ViewMissPunchout, } from '../../controllers/web/AttendanceController';
 import { addHoliday, getAllHolidays } from '../../controllers/web/HolidaysController';
 
 const usersRoute: Router = express.Router();
@@ -50,6 +50,7 @@ usersRoute.post("/attendance-punchout", verifyToken, punchOutAttendance);
 usersRoute.get("/get-attendance/:userId", verifyToken, getUserAttendanceById);
 usersRoute.post("/request-miss-punchout/:userId", verifyToken, RequestMissPunchOut);
 usersRoute.put("/approve-miss-punchout/:requestId", verifyToken, ApproveMissPunchOut);
+usersRoute.get("/view-miss-punchout-request/:requestId", verifyToken, ViewMissPunchout);
 
 // Holiday
 usersRoute.post("/add-holidays", verifyToken, addHoliday);

@@ -23,6 +23,69 @@ const allowedLon = 77.3895;
 const allowedRadius = 100; 
 
 
+// export const addUserAttendance = async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const {
+//       userId,
+//       date,
+//       dayName,
+//       punchIn,
+//       punchInDate,
+//       punchInLocation,
+//       latitude,
+//       longitude,
+//       status
+
+//     } = req.body;
+
+//     console.log("Received Body:", req.body);
+//     console.log("User ID:", userId);
+
+//     if (!userId || !date || !dayName || latitude == null || longitude == null) {
+//       res.status(400).json({ error: "Missing required fields including location." });
+//       return;
+//     }
+
+//     // Check if user already punched in for the date
+//     const [existing] = await db
+//       .select()
+//       .from(userAttendance)
+//       .where(and(eq(userAttendance.userId, userId), eq(userAttendance.date, date)));
+
+//     if (existing) {
+//       res.status(409).json({ error: "User has already punched in for this date." });
+//       return;
+//     }
+
+//     const distance = getDistanceFromLatLonInMeters(latitude, longitude, allowedLat, allowedLon);
+
+//     if (distance > allowedRadius) {
+//       res.status(403).json({
+//         error: "403 - You are not at the allowed location. Please go to the office to punch in."
+//       });
+//       return;
+//     }
+
+//     await db.insert(userAttendance).values({
+//       userId,
+//       date,
+//       dayName,
+//       punchIn,
+//       punchInDate: new Date(punchInDate),
+//       punchInLocation,
+//       punchInLatitude: String(latitude),
+//       punchInLongitude: String(longitude),
+//       status: status || "Present"
+//     });
+
+//     res.status(201).json({ message: "Punch In recorded successfully." });
+
+//   } catch (error) {
+//     console.error("Punch In Error:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
 export const addUserAttendance = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
@@ -34,7 +97,8 @@ export const addUserAttendance = async (req: Request, res: Response): Promise<vo
       punchInLocation,
       latitude,
       longitude,
-      status
+      status,
+      missPunchStatus 
     } = req.body;
 
     console.log("Received Body:", req.body);
@@ -45,7 +109,6 @@ export const addUserAttendance = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    // Check if user already punched in for the date
     const [existing] = await db
       .select()
       .from(userAttendance)
@@ -74,7 +137,8 @@ export const addUserAttendance = async (req: Request, res: Response): Promise<vo
       punchInLocation,
       punchInLatitude: String(latitude),
       punchInLongitude: String(longitude),
-      status: status || "Present"
+      status: status || "Present",
+      missPunchStatus: missPunchStatus ?? 0 
     });
 
     res.status(201).json({ message: "Punch In recorded successfully." });
@@ -84,6 +148,7 @@ export const addUserAttendance = async (req: Request, res: Response): Promise<vo
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 export const punchOutAttendance = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -163,9 +228,13 @@ export const getUserAttendanceById = async (req: Request, res: Response): Promis
   }
 };
 
-
 export const RequestMissPunchOut = async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!req.body) {
+      res.status(400).json({ error: "Missing request body." });
+      return;
+    }
+
     const userId = Number(req.params.userId);
     const { date, punchOut, reason } = req.body;
 
@@ -174,12 +243,28 @@ export const RequestMissPunchOut = async (req: Request, res: Response): Promise<
       return;
     }
 
+    const existing = await db
+      .select()
+      .from(missPunchRequests)
+      .where(and(eq(missPunchRequests.userId, userId), eq(missPunchRequests.date, date)));
+
+    if (existing.length > 0) {
+      res.status(409).json({ error: "A request for this date already exists." });
+      return;
+    }
+    // Insert miss punch-out request
     await db.insert(missPunchRequests).values({
       userId,
       date,
       punchOut,
       reason,
     });
+
+    // Update missPunchStatus in userAttendance to 1 (requested)
+    await db
+      .update(userAttendance)
+      .set({ missPunchStatus: 1 })
+      .where(and(eq(userAttendance.userId, userId), eq(userAttendance.date, date)));
 
     res.status(201).json({ message: "Miss punch-out request submitted successfully." });
   } catch (error) {
@@ -212,7 +297,8 @@ export const ApproveMissPunchOut = async (req: Request, res: Response): Promise<
       .set({
         punchOut: request.punchOut,
         punchOutLocation: request.reason,
-        status: "Present", 
+        status: "Present",
+        missPunchStatus: 2 
       })
       .where(
         and(
@@ -221,6 +307,7 @@ export const ApproveMissPunchOut = async (req: Request, res: Response): Promise<
         )
       );
 
+    // Update request status to "Approved"
     await db
       .update(missPunchRequests)
       .set({ status: "Approved" })
@@ -231,4 +318,109 @@ export const ApproveMissPunchOut = async (req: Request, res: Response): Promise<
     console.error("Approve Miss Punch-Out Error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
+};
+
+export const ViewMissPunchout = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const requestId = Number(req.params.requestId);
+
+    if (!requestId) {
+      res.status(400).json({ error: "Missing request ID." });
+      return;
+    }
+
+    const [request] = await db
+      .select()
+      .from(missPunchRequests)
+      .where(eq(missPunchRequests.id, requestId));
+
+    if (!request) {
+      res.status(404).json({ error: "Request not found." });
+      return;
+    }
+    
+
+    res.status(200).json({ data: request });
+  } catch (error) {
+    console.error("View Miss Punch-Out Error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+// export const ViewMissPunchout = async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const requestId = Number(req.params.requestId);
+
+//     if (!requestId) {
+//       res.status(400).json({ error: "Missing request ID." });
+//       return;
+//     }
+
+//     // Step 1: Fetch the miss punch request using ID
+//     const [request] = await db
+//       .select()
+//       .from(missPunchRequests)
+//       .where(eq(missPunchRequests.id, requestId));
+
+//     if (!request) {
+//       res.status(404).json({ error: "Request not found." });
+//       return;
+//     }
+
+//     const { userId, date } = request;
+
+//     // Step 2: Fetch matching user attendance details
+//     const [result] = await db
+//       .select({
+//         date: userAttendance.date,
+//         status: userAttendance.status,
+//         punchIn: userAttendance.punchIn,
+//         punchOut: userAttendance.punchOut,
+//         missPunchStatus: userAttendance.missPunchStatus,
+//         missPunchId: missPunchRequests.id,
+//       })
+//       .from(userAttendance)
+//       .leftJoin(
+//         missPunchRequests,
+//         and(
+//           eq(userAttendance.userId, missPunchRequests.userId),
+//           eq(userAttendance.date, missPunchRequests.date)
+//         )
+//       )
+//       .where(and(eq(userAttendance.userId, userId), eq(userAttendance.date, date)));
+
+//     if (!result) {
+//       res.status(404).json({ error: "Attendance not found." });
+//       return;
+//     }
+
+//     res.status(200).json({ data: result });
+//   } catch (error) {
+//     console.error("View Miss Punch-Out Error:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
+
+
+export const getAttendanceWithMissPunch = async (userId: number) => {
+  return await db
+    .select({
+      date: userAttendance.date,
+      status: userAttendance.status,
+      punchIn: userAttendance.punchIn,
+      punchOut: userAttendance.punchOut,
+      missPunchStatus: userAttendance.missPunchStatus,
+      missPunchId: missPunchRequests.id,
+    })
+    .from(userAttendance)
+    .leftJoin(
+      missPunchRequests,
+      and(
+        eq(userAttendance.userId, missPunchRequests.userId),
+        eq(userAttendance.date, missPunchRequests.date)
+      )
+    )
+    .where(eq(userAttendance.userId, userId));
 };

@@ -1,4 +1,3 @@
-// db_connect/Schema/MissPunchRequestSchema.ts
 import { pgTable, serial, integer, date, time, text, timestamp } from "drizzle-orm/pg-core";
 import { users } from "./UserSchema";
 
@@ -14,5 +13,5 @@ export const missPunchRequests = pgTable("miss_punch_requests", {
   reason: text("reason").notNull(),
 
   requestedAt: timestamp("requested_at").defaultNow().notNull(),
-  status: text("status").default("Pending"), // Optional: Pending / Approved / Rejected
+  status: text("status").default("Pending"),
 });
