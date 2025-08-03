@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-     "start": "node app.js",
+    "start": "nodemon ./src/index.ts",
     "generate": "drizzle-kit generate",
     "push": "drizzle-kit push",
     "create:tables": "ts-node --files ./migrations/migrator.ts"
