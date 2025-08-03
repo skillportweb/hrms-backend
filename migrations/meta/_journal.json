@@ -295,6 +295,13 @@
       "when": 1754031247008,
       "tag": "0041_peaceful_cargill",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1754111212517,
+      "tag": "0042_harsh_hulk",
+      "breakpoints": true
     }
   ]
 }

@@ -5,14 +5,14 @@ import { holidays } from "../../db_connect/Schema/HolidaysSchema";
 
 export const addHoliday = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { date, day, title, message } = req.body;
+    const { date, title, message } = req.body;
 
-    if (!date || !day || !title || !message) {
+    if (!date || !title || !message) {
       res.status(400).json({ message: "All fields are required" });
       return;
     }
 
-    await db.insert(holidays).values({ date, day, title, message });
+    await db.insert(holidays).values({ date, title, message });
 
     res.status(201).json({ message: "Holiday added successfully" });
   } catch (error) {

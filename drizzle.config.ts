@@ -6,11 +6,11 @@ export default defineConfig({
   out: "./migrations",
   dialect: "postgresql",
   dbCredentials: {
-    host: "localhost",
-    port: 3307,
-    user: "postgres",
-    password: "root",
-    database: "hrms",
-    ssl: false                          
+    host: 'localhost',
+  user: 'postgres',
+  port: 5432,
+  password: 'Dinesh@23',
+  database: 'hrms',
+  ssl: false
   }
 });

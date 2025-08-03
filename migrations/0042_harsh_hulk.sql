@@ -1,0 +1,1 @@
+ALTER TABLE "holidays" DROP COLUMN "day";
