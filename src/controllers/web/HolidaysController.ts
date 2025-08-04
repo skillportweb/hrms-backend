@@ -1,4 +1,3 @@
-// controllers/holidayController.ts
 import { Request, Response } from "express";
 import { db } from "../../db_connect/db";
 import { holidays } from "../../db_connect/Schema/HolidaysSchema";

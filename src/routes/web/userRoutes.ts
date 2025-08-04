@@ -22,6 +22,7 @@ import {
 } from './../../controllers/web/UserLeaveController';
 import { addUserAttendance, ApproveMissPunchOut, getUserAttendanceById, punchOutAttendance, RequestMissPunchOut,  ViewMissPunchout, } from '../../controllers/web/AttendanceController';
 import { addHoliday, getAllHolidays } from '../../controllers/web/HolidaysController';
+import { activateJob, addJob, deactivateJob, EditJob, getActiveJobs, getAllJobs, getJobById } from '../../controllers/admin/RecruitmentController';
 
 const usersRoute: Router = express.Router();
 
@@ -56,7 +57,16 @@ usersRoute.get("/view-miss-punchout-request/:requestId", verifyToken, ViewMissPu
 usersRoute.post("/add-holidays", verifyToken, addHoliday);
 usersRoute.get("/get-all-holiday",  verifyToken, getAllHolidays);
 
- 
+//  Recruitment
+
+usersRoute.post("/add-job", verifyToken, addJob);
+usersRoute.get("/get-all-jobs", verifyToken, getAllJobs);
+usersRoute.get("/getjobdetails/:id",verifyToken, getJobById);
+usersRoute.put("/edit-jobs/:id",verifyToken , EditJob);
+
+usersRoute.patch("/activejob/:id",verifyToken , activateJob);
+usersRoute.patch("/deactivatejob/:id",verifyToken , deactivateJob);
+usersRoute.get("/get-active-jobs",verifyToken , getActiveJobs);
 
 
 

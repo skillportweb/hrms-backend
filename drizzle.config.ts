@@ -8,8 +8,8 @@ export default defineConfig({
   dbCredentials: {
     host: 'localhost',
   user: 'postgres',
-  port: 5432,
-  password: 'Dinesh@23',
+  port: 3307,
+  password: 'root',
   database: 'hrms',
   ssl: false
   }

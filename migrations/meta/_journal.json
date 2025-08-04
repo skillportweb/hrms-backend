@@ -302,6 +302,20 @@
       "when": 1754111212517,
       "tag": "0042_harsh_hulk",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1754288240422,
+      "tag": "0043_loud_thundra",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1754311821914,
+      "tag": "0044_volatile_firelord",
+      "breakpoints": true
     }
   ]
 }

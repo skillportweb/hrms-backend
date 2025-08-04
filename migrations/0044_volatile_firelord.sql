@@ -1,0 +1,1 @@
+ALTER TABLE "jobs" ADD COLUMN "status" boolean DEFAULT false NOT NULL;

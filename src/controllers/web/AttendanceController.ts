@@ -23,69 +23,6 @@ const allowedLon = 77.3895;
 const allowedRadius = 100; 
 
 
-// export const addUserAttendance = async (req: Request, res: Response): Promise<void> => {
-//   try {
-//     const {
-//       userId,
-//       date,
-//       dayName,
-//       punchIn,
-//       punchInDate,
-//       punchInLocation,
-//       latitude,
-//       longitude,
-//       status
-
-//     } = req.body;
-
-//     console.log("Received Body:", req.body);
-//     console.log("User ID:", userId);
-
-//     if (!userId || !date || !dayName || latitude == null || longitude == null) {
-//       res.status(400).json({ error: "Missing required fields including location." });
-//       return;
-//     }
-
-//     // Check if user already punched in for the date
-//     const [existing] = await db
-//       .select()
-//       .from(userAttendance)
-//       .where(and(eq(userAttendance.userId, userId), eq(userAttendance.date, date)));
-
-//     if (existing) {
-//       res.status(409).json({ error: "User has already punched in for this date." });
-//       return;
-//     }
-
-//     const distance = getDistanceFromLatLonInMeters(latitude, longitude, allowedLat, allowedLon);
-
-//     if (distance > allowedRadius) {
-//       res.status(403).json({
-//         error: "403 - You are not at the allowed location. Please go to the office to punch in."
-//       });
-//       return;
-//     }
-
-//     await db.insert(userAttendance).values({
-//       userId,
-//       date,
-//       dayName,
-//       punchIn,
-//       punchInDate: new Date(punchInDate),
-//       punchInLocation,
-//       punchInLatitude: String(latitude),
-//       punchInLongitude: String(longitude),
-//       status: status || "Present"
-//     });
-
-//     res.status(201).json({ message: "Punch In recorded successfully." });
-
-//   } catch (error) {
-//     console.error("Punch In Error:", error);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// };
-
 export const addUserAttendance = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
@@ -346,63 +283,6 @@ export const ViewMissPunchout = async (req: Request, res: Response): Promise<voi
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
-
-// export const ViewMissPunchout = async (req: Request, res: Response): Promise<void> => {
-//   try {
-//     const requestId = Number(req.params.requestId);
-
-//     if (!requestId) {
-//       res.status(400).json({ error: "Missing request ID." });
-//       return;
-//     }
-
-//     // Step 1: Fetch the miss punch request using ID
-//     const [request] = await db
-//       .select()
-//       .from(missPunchRequests)
-//       .where(eq(missPunchRequests.id, requestId));
-
-//     if (!request) {
-//       res.status(404).json({ error: "Request not found." });
-//       return;
-//     }
-
-//     const { userId, date } = request;
-
-//     // Step 2: Fetch matching user attendance details
-//     const [result] = await db
-//       .select({
-//         date: userAttendance.date,
-//         status: userAttendance.status,
-//         punchIn: userAttendance.punchIn,
-//         punchOut: userAttendance.punchOut,
-//         missPunchStatus: userAttendance.missPunchStatus,
-//         missPunchId: missPunchRequests.id,
-//       })
-//       .from(userAttendance)
-//       .leftJoin(
-//         missPunchRequests,
-//         and(
-//           eq(userAttendance.userId, missPunchRequests.userId),
-//           eq(userAttendance.date, missPunchRequests.date)
-//         )
-//       )
-//       .where(and(eq(userAttendance.userId, userId), eq(userAttendance.date, date)));
-
-//     if (!result) {
-//       res.status(404).json({ error: "Attendance not found." });
-//       return;
-//     }
-
-//     res.status(200).json({ data: result });
-//   } catch (error) {
-//     console.error("View Miss Punch-Out Error:", error);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// };
-
-
 
 export const getAttendanceWithMissPunch = async (userId: number) => {
   return await db
