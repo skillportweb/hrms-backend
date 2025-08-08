@@ -1,0 +1,1 @@
+ALTER TABLE "departments" ADD COLUMN "status" integer DEFAULT 0;

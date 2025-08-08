@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { db } from '../../db_connect/db';
-import { eq } from 'drizzle-orm';
+import { eq,isNull  } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer'
@@ -272,3 +272,57 @@ export const logoutUser = async (req: Request, res: Response): Promise<void> => 
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+// export const getAllUserNamesWithId = async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const userList = await db.select({
+//       id: users.id,
+//       firstname: users.firstname,
+//     }).from(users);
+
+//     res.status(200).json({ data: userList }); 
+//   } catch (error) {
+//     console.error('Error fetching user names:', error);
+//     res.status(500).json({ message: 'Internal server error' });
+//   }
+// };
+
+
+export const getAllUserNamesWithId = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userList = await db
+      .select({
+        id: users.id,
+        firstname: users.firstname,
+      })
+      .from(users)
+      .where(isNull(users.departmentId)); //  Correct syntax
+
+    res.status(200).json({ data: userList });
+  } catch (error) {
+    console.error('Error fetching user names:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
+export const getUsersByDepartmentId = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { departmentId } = req.params;
+
+    if (!departmentId) {
+      res.status(400).json({ message: "Department ID is required" });
+      return;
+    }
+
+    const userList = await db
+      .select()
+      .from(users)
+      .where(eq(users.departmentId, Number(departmentId))); 
+
+    res.status(200).json({ data: userList });
+  } catch (error) {
+    console.error("Error fetching users by departmentId:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}

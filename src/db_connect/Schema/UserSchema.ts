@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, boolean } from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar, boolean, integer } from "drizzle-orm/pg-core";
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -12,4 +12,5 @@ export const users = pgTable('users', {
   designation: varchar('designation', { length: 255 }),
   approved: boolean('approved').default(false),
   isBlocked: boolean('isBlocked').default(false), 
+     departmentId: integer('department_id'),
 });

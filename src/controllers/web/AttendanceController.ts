@@ -18,8 +18,8 @@ function getDistanceFromLatLonInMeters(lat1: number, lon1: number, lat2: number,
   return R * c;
 }
 
-const allowedLat = 28.6018;
-const allowedLon = 77.3895;
+const allowedLat = 28.6053;
+const allowedLon = 77.3891;
 const allowedRadius = 100; 
 
 
@@ -152,11 +152,7 @@ export const getUserAttendanceById = async (req: Request, res: Response): Promis
       .from(userAttendance)
       .where(eq(userAttendance.userId, userId));
 
-    if (records.length === 0) {
-      res.status(404).json({ message: "No attendance records found for this user." });
-      return;
-    }
-
+    // Always return the result, even if it's empty
     res.status(200).json({ userId, attendance: records });
 
   } catch (error) {
@@ -164,6 +160,7 @@ export const getUserAttendanceById = async (req: Request, res: Response): Promis
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 export const RequestMissPunchOut = async (req: Request, res: Response): Promise<void> => {
   try {

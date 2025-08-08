@@ -3,8 +3,10 @@ import { verifyToken } from './../../middleware/authMiddleware';
 import express, { Router } from "express";
 import {
   approveUser,
+  getAllUserNamesWithId,
   getAllUsers,
   getUserProfile,
+  getUsersByDepartmentId,
   loginUser,
   logoutUser,
   usersRegistration
@@ -23,6 +25,9 @@ import {
 import { addUserAttendance, ApproveMissPunchOut, getUserAttendanceById, punchOutAttendance, RequestMissPunchOut,  ViewMissPunchout, } from '../../controllers/web/AttendanceController';
 import { addHoliday, getAllHolidays } from '../../controllers/web/HolidaysController';
 import { activateJob, addJob, deactivateJob, EditJob, getActiveJobs, getAllJobs, getJobById } from '../../controllers/admin/RecruitmentController';
+import { addDepartment, getAllDepartments, getAllDepartmentsTitle, getDepartmentById, updateDepartment } from '../../controllers/admin/DepartmentsController';
+import { addDepartmentMembers, getUsersByDepartment } from '../../controllers/admin/MemberController';
+
 
 const usersRoute: Router = express.Router();
 
@@ -32,6 +37,8 @@ usersRoute.get('/all-users', verifyToken, getAllUsers);
 usersRoute.put('/approve-user/:userId', verifyToken, approveUser);
 usersRoute.get('/profile', verifyToken, getUserProfile);
 usersRoute.post('/logout', verifyToken, logoutUser);
+usersRoute.get('/get-all-usernames-with-id', verifyToken, getAllUserNamesWithId);
+
 
 usersRoute.post("/admingivenleave/:userId", verifyToken, yearlyLeaving);
 usersRoute.get("/leave-balance/:userId", verifyToken, getUserLeaveBalance);
@@ -67,6 +74,19 @@ usersRoute.put("/edit-jobs/:id",verifyToken , EditJob);
 usersRoute.patch("/activejob/:id",verifyToken , activateJob);
 usersRoute.patch("/deactivatejob/:id",verifyToken , deactivateJob);
 usersRoute.get("/get-active-jobs",verifyToken , getActiveJobs);
+
+// Department
+usersRoute.post("/add-department",verifyToken ,addDepartment);
+usersRoute.get("/get-all-departments",verifyToken ,getAllDepartments);
+usersRoute.put("/update-department/:id",verifyToken ,updateDepartment);
+usersRoute.get("/get-department-by-id/:id",verifyToken ,getDepartmentById);
+// usersRoute.get("/get-all-departments-title",verifyToken,getAllDepartmentsTitle);
+usersRoute.post("/add-department-members",verifyToken ,addDepartmentMembers);
+usersRoute.get("/get-users-dy-department-id/:id",verifyToken ,getUsersByDepartment);
+usersRoute.get("/get-users-by-departmentid/:departmentId",verifyToken ,getUsersByDepartmentId);
+
+
+
 
 
 

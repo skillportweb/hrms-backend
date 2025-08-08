@@ -316,6 +316,48 @@
       "when": 1754311821914,
       "tag": "0044_volatile_firelord",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1754463246871,
+      "tag": "0045_small_tusk",
+      "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1754467154208,
+      "tag": "0046_redundant_fixer",
+      "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1754549517169,
+      "tag": "0047_first_stranger",
+      "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1754550382249,
+      "tag": "0048_robust_amphibian",
+      "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1754550754726,
+      "tag": "0049_wide_black_queen",
+      "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1754559740897,
+      "tag": "0050_mute_maddog",
+      "breakpoints": true
     }
   ]
 }

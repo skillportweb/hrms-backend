@@ -1,0 +1,1 @@
+ALTER TABLE "members" ADD COLUMN "department_name" text NOT NULL;
