@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: "dinesh1804200182@gmail.com",
-    pass: "alrxrwgdsrixbuen", // 🔐 Use environment variables in production!
+    pass: "alrxrwgdsrixbuen", // Use environment variables in production!
   },
 });
 
@@ -26,32 +26,9 @@ const sendEmail = async (to: string, subject: string, html: string) => {
       html,
     });
   } catch (err) {
-    console.error(`❌ Failed to send email to ${to}:`, err);
+    console.error(` Failed to send email to ${to}:`, err);
   }
 };
-
-// --- Email HTML Template ---
-// --- Email HTML Template ---
-// const updateMemberTemplate = (
-//   username: string,
-//   deptName: string,
-//   action: "added" | "removed"
-// ) => {
-//   return `
-//     <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px;">
-//       <h2 style="color: #2c3e50;">Hello ${username || "User"},</h2>
-//       <p>You have been <strong>${action}</strong> ${
-//         action === "added" ? "to" : "from"
-//       } the department: <strong>${deptName}</strong>.</p>
-//       <p>If you have any questions regarding this change, feel free to reach out to your administrator.</p>
-//       <br/>
-//       <p>Best regards,<br/>
-//       <strong>Yiron Technologies Pvt Ltd</strong><br/>
-//       Team Management System</p>
-//     </div>
-//   `;
-// };
-
 
 // --- Main Function ---
 export const addDepartmentMembers = async (req: Request, res: Response): Promise<void> => {
@@ -63,7 +40,7 @@ export const addDepartmentMembers = async (req: Request, res: Response): Promise
       return;
     }
 
-    // 🔎 Get department title
+    //  Get department title
     const department = await db
       .select()
       .from(departments)
@@ -71,7 +48,7 @@ export const addDepartmentMembers = async (req: Request, res: Response): Promise
 
     const departmentName = department[0]?.title || "Unknown Department";
 
-    // ➕ Handle additions
+    //  Handle additions
     if (userIds.length > 0) {
       await db.update(users).set({ departmentId }).where(inArray(users.id, userIds));
       const addedUsers = await db.select().from(users).where(inArray(users.id, userIds));
@@ -84,7 +61,7 @@ export const addDepartmentMembers = async (req: Request, res: Response): Promise
       }
     }
 
-    // ➖ Handle removals
+    //  Handle removals
     if (removedUserIds.length > 0) {
       await db.update(users).set({ departmentId: null }).where(inArray(users.id, removedUserIds));
       const removedUsers = await db.select().from(users).where(inArray(users.id, removedUserIds));
@@ -125,3 +102,4 @@ export const getUsersByDepartment = async (req: Request, res: Response): Promise
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+

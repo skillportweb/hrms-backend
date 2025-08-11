@@ -25,7 +25,7 @@ import {
 import { addUserAttendance, ApproveMissPunchOut, getUserAttendanceById, punchOutAttendance, RequestMissPunchOut,  ViewMissPunchout, } from '../../controllers/web/AttendanceController';
 import { addHoliday, getAllHolidays } from '../../controllers/web/HolidaysController';
 import { activateJob, addJob, deactivateJob, EditJob, getActiveJobs, getAllJobs, getJobById } from '../../controllers/admin/RecruitmentController';
-import { addDepartment, getAllDepartments, getAllDepartmentsTitle, getDepartmentById, updateDepartment } from '../../controllers/admin/DepartmentsController';
+import { addDepartment, changeUserDepartment, getAllDepartments, getAllDepartmentsTitle, getDepartmentById, updateDepartment, UpdateDepartmentStatus, } from '../../controllers/admin/DepartmentsController';
 import { addDepartmentMembers, getUsersByDepartment } from '../../controllers/admin/MemberController';
 
 
@@ -80,10 +80,13 @@ usersRoute.post("/add-department",verifyToken ,addDepartment);
 usersRoute.get("/get-all-departments",verifyToken ,getAllDepartments);
 usersRoute.put("/update-department/:id",verifyToken ,updateDepartment);
 usersRoute.get("/get-department-by-id/:id",verifyToken ,getDepartmentById);
-// usersRoute.get("/get-all-departments-title",verifyToken,getAllDepartmentsTitle);
+usersRoute.get("/get-all-departments-title",verifyToken,getAllDepartmentsTitle);
 usersRoute.post("/add-department-members",verifyToken ,addDepartmentMembers);
 usersRoute.get("/get-users-dy-department-id/:id",verifyToken ,getUsersByDepartment);
 usersRoute.get("/get-users-by-departmentid/:departmentId",verifyToken ,getUsersByDepartmentId);
+usersRoute.put("/update-department-status/:id",verifyToken, UpdateDepartmentStatus);
+usersRoute.put("/change-department", verifyToken, changeUserDepartment);
+
 
 
 
