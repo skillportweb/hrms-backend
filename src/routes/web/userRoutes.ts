@@ -27,6 +27,7 @@ import { addHoliday, getAllHolidays } from '../../controllers/web/HolidaysContro
 import { activateJob, addJob, deactivateJob, EditJob, getActiveJobs, getAllJobs, getJobById } from '../../controllers/admin/RecruitmentController';
 import { addDepartment, changeUserDepartment, getAllDepartments, getAllDepartmentsTitle, getDepartmentById, updateDepartment, UpdateDepartmentStatus, } from '../../controllers/admin/DepartmentsController';
 import { addDepartmentMembers, getUsersByDepartment } from '../../controllers/admin/MemberController';
+import { getPromotionsByUserId, updateUserPromotion } from '../../controllers/admin/PayrollController';
 
 
 const usersRoute: Router = express.Router();
@@ -88,6 +89,10 @@ usersRoute.put("/update-department-status/:id",verifyToken, UpdateDepartmentStat
 usersRoute.put("/change-department", verifyToken, changeUserDepartment);
 
 
+
+
+usersRoute.put("/user-promotion/:id",verifyToken, updateUserPromotion);
+usersRoute.get("/get-all-promotions/:id",verifyToken, getPromotionsByUserId);
 
 
 

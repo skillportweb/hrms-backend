@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "promotion_date" varchar(255);

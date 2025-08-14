@@ -328,33 +328,6 @@ if (status === "unblocked") {
   }
 };
 
-
-// export const getAllUsers = async (req: Request,res: Response): Promise<void> => {
-//   try {
-//     const userId = (req as any).user?.id;
-//     const userRole = (req as any).user?.role;
-
-//     if (userRole !== 1) {
-//       res.status(403).json({ message: "Access denied. Admins only." });
-//       return;
-//     }
-
-//     const allUsers = await db.select().from(users);
-
-//     const filteredUsers = allUsers
-//       .filter((user) => user.id !== userId)
-//       .map(({ password, ...rest }) => rest);
-
-//     res.status(200).json({
-//       message: "Admin fetched data successfully",
-//       users: filteredUsers,
-//     });
-//   } catch (error) {
-//     console.error("Error fetching users:", error);
-//     res.status(500).json({ message: "Internal server error" });
-//   }
-// };
-
 export const getAllUsers = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user?.id;
@@ -379,6 +352,9 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
         approved: users.approved,
         departmentId: users.departmentId,
         departmentName: departments.title, 
+         currentPayroll: users.currentPayroll,
+         promotionDate: users.promotionDate,
+
       })
       .from(users)
       .leftJoin(departments, eq(users.departmentId, departments.id));
