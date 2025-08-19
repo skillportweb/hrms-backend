@@ -371,7 +371,7 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const getUserProfile = async (req: AuthRequest,res: Response): Promise<void> => {
+export const getUserProfile = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.user?.id;
 
@@ -380,7 +380,28 @@ export const getUserProfile = async (req: AuthRequest,res: Response): Promise<vo
       return;
     }
 
-    const result = await db.select().from(users).where(eq(users.id, userId));
+    // Fetch user with department name
+    const result = await db
+      .select({
+        id: users.id,
+        firstname: users.firstname,
+        lastname: users.lastname,
+        email: users.email,
+        phone: users.phone,
+        dob: users.dob,
+        role: users.role,
+        designation: users.designation,
+        approved: users.approved,
+        isBlocked: users.isBlocked,
+        currentPayroll: users.currentPayroll,
+        promotionDate: users.promotionDate,
+        departmentId: users.departmentId,
+        departmentName: departments.title 
+      })
+      .from(users)
+      .leftJoin(departments, eq(users.departmentId, departments.id))
+      .where(eq(users.id, userId));
+
     const user = result[0];
 
     if (!user) {
@@ -388,11 +409,9 @@ export const getUserProfile = async (req: AuthRequest,res: Response): Promise<vo
       return;
     }
 
-    const { password, ...userWithoutPassword } = user;
-
     res.status(200).json({
       message: "User profile fetched successfully",
-      user: userWithoutPassword,
+      user,
     });
   } catch (error) {
     console.error("Error fetching user profile:", error);
