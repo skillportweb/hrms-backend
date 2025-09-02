@@ -453,3 +453,25 @@ export const getSingleLeaveRequestById = async (req: Request, res: Response): Pr
   }
 };
 
+export const getLeaveRequestSummary = async (req: Request, res: Response): Promise<void> => {
+  try {
+    // Fetch all leave requests
+    const allRequests = await db.select().from(userLeaveRequests);
+
+    // Count by status
+    const newRequests = allRequests.filter(req => req.status === "pending").length;
+    const approvedRequests = allRequests.filter(req => req.status === "approved").length;
+    const rejectedRequests = allRequests.filter(req => req.status === "rejected").length;
+    const totalRequests = allRequests.length;
+
+    res.status(200).json({
+      newRequests,
+      approvedRequests,
+      rejectedRequests,
+      totalRequests,
+    });
+  } catch (error) {
+    console.error("Error fetching leave request summary:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};

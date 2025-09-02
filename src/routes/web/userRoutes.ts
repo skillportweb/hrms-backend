@@ -15,6 +15,7 @@ import {
   applyLeave,
   getAllLeaveRequestsWithUserInfo,
   getApprovedAndRejectedLeaveRequests,
+  getLeaveRequestSummary,
   getPendingLeaveRequests,
   getSingleLeaveRequestById,
   getUserapplyLeaves,
@@ -43,7 +44,7 @@ usersRoute.get('/profile', verifyToken, getUserProfile);
 usersRoute.post('/logout', verifyToken, logoutUser);
 usersRoute.get('/get-all-usernames-with-id', verifyToken, getAllUserNamesWithId);
 
-
+// Leave
 usersRoute.post("/admingivenleave/:userId", verifyToken, yearlyLeaving);
 usersRoute.get("/leave-balance/:userId", verifyToken, getUserLeaveBalance);
 usersRoute.post("/userleaveapply/:userId", verifyToken, applyLeave);
@@ -53,6 +54,7 @@ usersRoute.get("/get-approvedandrejected-leaverequests", verifyToken, getApprove
 usersRoute.get("/get-single-leaverequest/:id", verifyToken, getSingleLeaveRequestById);
 usersRoute.get("/get-pending-leaverequests", verifyToken, getPendingLeaveRequests); 
 usersRoute.get("/get-apply-leaves/:userId", verifyToken, getUserapplyLeaves); 
+usersRoute.get("/get-leave-request-summary", verifyToken, getLeaveRequestSummary); 
 
 
 // userAttendance
