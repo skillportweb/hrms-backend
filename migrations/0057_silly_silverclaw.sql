@@ -1,0 +1,1 @@
+ALTER TABLE "support_requests" ALTER COLUMN "status" SET DEFAULT '0';

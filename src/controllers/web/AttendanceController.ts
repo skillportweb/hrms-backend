@@ -18,8 +18,8 @@ function getDistanceFromLatLonInMeters(lat1: number, lon1: number, lat2: number,
   return R * c;
 }
 
-const allowedLat = 28.6032;
-const allowedLon = 77.3898;
+const allowedLat = 28.6018;
+const allowedLon = 77.3894;
 const allowedRadius = 100; 
 
 
@@ -85,7 +85,6 @@ export const addUserAttendance = async (req: Request, res: Response): Promise<vo
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 
 export const punchOutAttendance = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -160,7 +159,6 @@ export const getUserAttendanceById = async (req: Request, res: Response): Promis
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 
 export const RequestMissPunchOut = async (req: Request, res: Response): Promise<void> => {
   try {

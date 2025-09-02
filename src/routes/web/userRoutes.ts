@@ -27,7 +27,10 @@ import { addHoliday, getAllHolidays } from '../../controllers/web/HolidaysContro
 import { activateJob, addJob, deactivateJob, EditJob, getActiveJobs, getAllJobs, getJobById } from '../../controllers/admin/RecruitmentController';
 import { addDepartment, changeUserDepartment, getAllDepartments, getAllDepartmentsTitle, getDepartmentById, updateDepartment, UpdateDepartmentStatus, } from '../../controllers/admin/DepartmentsController';
 import { addDepartmentMembers, getUsersByDepartment } from '../../controllers/admin/MemberController';
-import { getPromotionsByUserId, updateUserPromotion } from '../../controllers/admin/PayrollController';
+import { getPromotionsByUserId, updateUserPromotion } from '../../controllers/admin/PayrollController'; 
+
+import { createSupportRequest, getPendingRequestsByUserId, getSolvedRequestsByUserId, getSupportRequestDetailsById, getSupportRequests, getSupportRequestsCount, solveSupportRequest } from './../../controllers/web/SupportContriller';
+import { addTask, completeTask, deleteTask, getCompletedTasks, getPendingTasks, } from '../../controllers/web/TasksToDoController';
 
 
 const usersRoute: Router = express.Router();
@@ -90,9 +93,28 @@ usersRoute.put("/change-department", verifyToken, changeUserDepartment);
 
 
 
-
+// promotion
 usersRoute.put("/user-promotion/:id",verifyToken, updateUserPromotion);
 usersRoute.get("/get-all-promotions/:id",verifyToken, getPromotionsByUserId);
+
+// Support
+usersRoute.post("/support-request" ,verifyToken, createSupportRequest);
+usersRoute.get("/get-support-requests" ,verifyToken, getSupportRequests);
+usersRoute.get("/get-request-details/:id" ,verifyToken, getSupportRequestDetailsById);
+usersRoute.get("/support/pending/:userId",verifyToken, getPendingRequestsByUserId);
+usersRoute.get("/support/solved/:userId", verifyToken, getSolvedRequestsByUserId);
+usersRoute.get("/get-support-requests-count", verifyToken, getSupportRequestsCount);
+usersRoute.put("/support/solve/:id", verifyToken, solveSupportRequest);
+
+// My TasksToDo
+
+
+usersRoute.post("/add-task",verifyToken, addTask);
+usersRoute.delete("/delete-task/:id", verifyToken, deleteTask);
+usersRoute.put("/task/complete/:id", verifyToken, completeTask);
+usersRoute.get("/tasks/pending/:userId",verifyToken, getPendingTasks);
+usersRoute.get("/tasks/completed/:userId",verifyToken, getCompletedTasks);
+
 
 
 

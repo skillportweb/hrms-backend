@@ -1,0 +1,1 @@
+ALTER TABLE "support_requests" ADD COLUMN "status" varchar(50) DEFAULT 'Pending' NOT NULL;
