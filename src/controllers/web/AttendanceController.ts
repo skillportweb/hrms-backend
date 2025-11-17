@@ -18,8 +18,8 @@ function getDistanceFromLatLonInMeters(lat1: number, lon1: number, lat2: number,
   return R * c;
 }
 
-const allowedLat = 28.6018;
-const allowedLon = 77.3894;
+const allowedLat = 28.6053;
+const allowedLon = 77.3898;
 const allowedRadius = 100; 
 
 

@@ -10,11 +10,92 @@ import { AuthRequest } from "../../middleware/authMiddleware";
 import { users } from "./../../db_connect/Schema/UserSchema";
 import { departments } from "../../db_connect/Schema/DepartmentSchema";
 
-
 const blacklistedTokens = new Set<string>();
 export { blacklistedTokens };
 
 const JWT_SECRET = "your_jwt_secret_key";
+
+// export const usersRegistration = async (
+//   req: Request,
+//   res: Response
+// ): Promise<void> => {
+//   try {
+//     const {
+//       firstname,
+//       lastname,
+//       email,
+//       phone,
+//       password,
+//       dob,
+//       role,
+//       designation,
+//     } = req.body;
+
+//     if (
+//       !firstname ||
+//       !lastname ||
+//       !email ||
+//       !phone ||
+//       !password ||
+//       !dob ||
+//       !designation
+//     ) {
+//       res.status(400).json({ message: "All fields are required" });
+//       return;
+//     }
+
+//     const existingUser = await db
+//       .select()
+//       .from(users)
+//       .where(eq(users.email, email));
+//     if (existingUser.length > 0) {
+//       res.status(400).json({ message: "Email already registered" });
+//       return;
+//     }
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     await db.insert(users).values({
+//       firstname,
+//       lastname,
+//       email,
+//       phone,
+//       password: hashedPassword,
+//       dob,
+//       designation,
+//       role: typeof role === "number" ? role : 0,
+//     });
+
+//     const transporter = nodemailer.createTransport({
+//       service: "gmail",
+//       auth: {
+//         user: "dinesh1804200182@gmail.com",
+//         pass: "alrxrwgdsrixbuen",
+//       },
+//     });
+
+//     const mailOptions = {
+//       from: '"HRMS System" <admin@example.com>',
+//       to: "dinesh1804200182@gmail.com",
+//       subject: "New Employee Registration - Approval Required",
+//       html: getRegistrationEmailTemplate(
+//         firstname,
+//         lastname,
+//         email,
+//         designation
+//       ),
+//     };
+
+//     await transporter.sendMail(mailOptions);
+
+//     res
+//       .status(201)
+//       .json({ message: "User registered and email sent successfully" });
+//   } catch (error) {
+//     console.error("Registration error:", error);
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// };
 
 export const usersRegistration = async (
   req: Request,
@@ -49,6 +130,7 @@ export const usersRegistration = async (
       .select()
       .from(users)
       .where(eq(users.email, email));
+
     if (existingUser.length > 0) {
       res.status(400).json({ message: "Email already registered" });
       return;
@@ -56,16 +138,21 @@ export const usersRegistration = async (
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await db.insert(users).values({
-      firstname,
-      lastname,
-      email,
-      phone,
-      password: hashedPassword,
-      dob,
-      designation,
-      role: typeof role === "number" ? role : 0,
-    });
+    const insertedUser = await db
+      .insert(users)
+      .values({
+        firstname,
+        lastname,
+        email,
+        phone,
+        password: hashedPassword,
+        dob,
+        designation,
+        role: typeof role === "number" ? role : 0,
+      })
+      .returning({ id: users.id });
+
+    const userId = insertedUser[0]?.id;
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -89,9 +176,10 @@ export const usersRegistration = async (
 
     await transporter.sendMail(mailOptions);
 
-    res
-      .status(201)
-      .json({ message: "User registered and email sent successfully" });
+    res.status(201).json({
+      message: "User registered and email sent successfully",
+      userId,
+    });
   } catch (error) {
     console.error("Registration error:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -233,8 +321,10 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
 //   }
 // };
 
-
-export const approveUser = async (req: Request,res: Response): Promise<void> => {
+export const approveUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const userId = Number(req.params.userId);
     const { status } = req.body;
@@ -258,29 +348,29 @@ export const approveUser = async (req: Request,res: Response): Promise<void> => 
 
     //  Check department status before unblocking
     //  Check department status before unblocking
- //  Check department status before unblocking
-if (status === "unblocked") {
-  if (user.departmentId) {
-    // User has a department, check its status
-    const deptResult = await db
-      .select({ status: departments.status })
-      .from(departments)
-      .where(eq(departments.id, user.departmentId));
+    //  Check department status before unblocking
+    if (status === "unblocked") {
+      if (user.departmentId) {
+        // User has a department, check its status
+        const deptResult = await db
+          .select({ status: departments.status })
+          .from(departments)
+          .where(eq(departments.id, user.departmentId));
 
-    if (deptResult.length === 0) {
-      res.status(404).json({ message: "User's department not found." });
-      return;
-    }
+        if (deptResult.length === 0) {
+          res.status(404).json({ message: "User's department not found." });
+          return;
+        }
 
-    if (deptResult[0].status === 0) {
-      res
-        .status(400)
-        .json({ message: "Cannot unblock user. Department is inactive." });
-      return;
+        if (deptResult[0].status === 0) {
+          res
+            .status(400)
+            .json({ message: "Cannot unblock user. Department is inactive." });
+          return;
+        }
+      }
+      // If departmentId is null → allow unblocking
     }
-  }
-  // If departmentId is null → allow unblocking
-}
 
     // Already in desired state
     if (
@@ -328,7 +418,10 @@ if (status === "unblocked") {
   }
 };
 
-export const getAllUsers = async (req: Request, res: Response): Promise<void> => {
+export const getAllUsers = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const userId = (req as any).user?.id;
     const userRole = (req as any).user?.role;
@@ -351,10 +444,9 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
         isBlocked: users.isBlocked,
         approved: users.approved,
         departmentId: users.departmentId,
-        departmentName: departments.title, 
-         currentPayroll: users.currentPayroll,
-         promotionDate: users.promotionDate,
-
+        departmentName: departments.title,
+        currentPayroll: users.currentPayroll,
+        promotionDate: users.promotionDate,
       })
       .from(users)
       .leftJoin(departments, eq(users.departmentId, departments.id));
@@ -371,7 +463,10 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const getUserProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getUserProfile = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
   try {
     const userId = req.user?.id;
 
@@ -396,7 +491,7 @@ export const getUserProfile = async (req: AuthRequest, res: Response): Promise<v
         currentPayroll: users.currentPayroll,
         promotionDate: users.promotionDate,
         departmentId: users.departmentId,
-        departmentName: departments.title 
+        departmentName: departments.title,
       })
       .from(users)
       .leftJoin(departments, eq(users.departmentId, departments.id))
@@ -419,7 +514,10 @@ export const getUserProfile = async (req: AuthRequest, res: Response): Promise<v
   }
 };
 
-export const logoutUser = async (req: Request,res: Response): Promise<void> => {
+export const logoutUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
 
@@ -450,7 +548,10 @@ export const logoutUser = async (req: Request,res: Response): Promise<void> => {
 //   }
 // };
 
-export const getAllUserNamesWithId = async ( req: Request, res: Response): Promise<void> => {
+export const getAllUserNamesWithId = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const userList = await db
       .select({
@@ -467,7 +568,10 @@ export const getAllUserNamesWithId = async ( req: Request, res: Response): Promi
   }
 };
 
-export const getUsersByDepartmentId = async (  req: Request,  res: Response): Promise<void> => {
+export const getUsersByDepartmentId = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { departmentId } = req.params;
 
