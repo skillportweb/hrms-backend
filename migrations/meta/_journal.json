@@ -428,6 +428,13 @@
       "when": 1756732243495,
       "tag": "0060_cloudy_nova",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1765516731978,
+      "tag": "0061_flippant_hobgoblin",
+      "breakpoints": true
     }
   ]
 }
